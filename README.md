@@ -25,7 +25,7 @@ read_line : unit -> string Lwt.t
 write_line : string -> unit Lwt.t
 ```
 ```ocaml
-wait_for_line : ?line: string option -> string -> unit Lwt.t
+wait_for_line : string -> unit Lwt.t
 ```
 Usage: `wait_for_line "READY"`.
 Currently waits forever if the keyword is not received.

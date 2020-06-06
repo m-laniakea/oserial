@@ -14,7 +14,7 @@ module type Serial_type = sig
   val read_line : unit -> string Lwt.t
   val write_line : string -> unit Lwt.t
 
-  val wait_for_line : ?line: string option -> string -> unit Lwt.t
+  val wait_for_line : string -> unit Lwt.t
 
   val io_loop : string option -> unit Lwt.t
 end

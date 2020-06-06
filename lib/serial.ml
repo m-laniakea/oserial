@@ -19,11 +19,15 @@ module Make (T : Serial_config_type) = struct
   let write_line l = 
     Lwt_io.fprintl Private.out_channel l
 
-  let rec wait_for_line ?(line = None) to_wait_for = match line with
-  | Some line when line = to_wait_for -> Lwt.return ()
-  | None | Some _ -> 
+  let wait_for_line to_wait_for = 
+    let rec loop = function
+    | Some line when line = to_wait_for -> 
+        Lwt.return ()
+    | _ -> 
       read_line () >>= fun line ->
-      wait_for_line ~line:(Some line) to_wait_for
+      loop (Some line)
+    in
+    loop None
 
   let rec io_loop until =
     let read_to_stdin () = 
