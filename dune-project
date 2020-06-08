@@ -13,7 +13,7 @@
 	(synopsis "Serial communication module")
 	(depends
 		(dune
-			(>= 1.11))
+			(>= 2.5))
 		(ocaml
 			(>= 4.08))
 		(lwt
