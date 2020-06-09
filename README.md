@@ -10,6 +10,7 @@ Create a Serial_config module
 ```ocaml
 module Serial_config = struct
     let port = "/dev/ttyUSB0"
+    let baud_rate = 115200
 end
 ```
 

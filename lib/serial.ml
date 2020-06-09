@@ -3,10 +3,21 @@ open Lwt.Infix
 
 module Make (T : Serial_config_type) = struct 
   let port = T.port
+  let baud_rate = T.baud_rate
 
   module Private = struct
+
     let fd = Lwt_main.run begin
-      Lwt_unix.openfile port [Unix.O_RDWR; Unix.O_NONBLOCK] 0o640
+      Lwt_unix.openfile port [Unix.O_RDWR; Unix.O_NONBLOCK] 0o640 >>= fun fd ->
+      Lwt_unix.tcgetattr fd >>= fun attr ->
+      Lwt_unix.tcsetattr fd Unix.TCSANOW
+        { attr with
+          c_ibaud = baud_rate
+        ; c_obaud = baud_rate
+        ; c_icanon = false
+        ; c_echo = false
+        } >>= fun () ->
+      Lwt.return fd
     end
 
     let in_channel = Lwt_io.of_fd fd ~mode:Lwt_io.input;;

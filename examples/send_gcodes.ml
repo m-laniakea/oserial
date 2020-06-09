@@ -1,7 +1,8 @@
 open Lwt.Infix
 
 module Serial_config = struct
-  let port = "/dev/pts/9"
+  let port = "/dev/ttyUSB0"
+  let baud_rate = 115200
 end
 
 module Serial0 = Serial.Make(Serial_config)

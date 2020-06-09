@@ -1,5 +1,6 @@
 module type Serial_config_type = sig
   val port : string
+  val baud_rate : int
 end
 
 module type Serial_type = sig 
