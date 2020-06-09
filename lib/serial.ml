@@ -8,20 +8,25 @@ module Make (T : Serial_config_type) = struct
 	module Private = struct
 
 		let fd = Lwt_main.run begin
-			Lwt_unix.openfile port [Unix.O_RDWR; Unix.O_NONBLOCK] 0o000 >>= fun fd ->
-			Lwt_unix.tcgetattr fd >>= fun attr ->
-			Lwt_unix.tcsetattr fd Unix.TCSANOW
-				{ attr with
-					c_ibaud = baud_rate
-				; c_obaud = baud_rate
-				; c_icanon = false
-				; c_echo = false
-				} >>= fun () ->
-			Lwt.return fd
+			Lwt_unix.openfile port [Unix.O_RDWR; Unix.O_NONBLOCK] 0o000
 		end
 
 		let in_channel = Lwt_io.of_fd fd ~mode:Lwt_io.input
 		let out_channel  = Lwt_io.of_fd fd ~mode:Lwt_io.output
+	end
+
+	let set_baud_rate baud_rate =
+		Lwt_unix.tcgetattr Private.fd >>= fun attr ->
+		Lwt_unix.tcsetattr Private.fd Unix.TCSANOW
+			{ attr with c_ibaud = baud_rate
+			; c_obaud = baud_rate
+			; c_echo = false
+			; c_icanon = false
+			}
+
+	(* Initialize with desired baud rate *)
+	let () = Lwt_main.run begin
+		set_baud_rate baud_rate
 	end
 
 	let read_line () =
