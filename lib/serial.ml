@@ -8,7 +8,7 @@ module Make (T : Serial_config_type) = struct
 	module Private = struct
 
 		let fd = Lwt_main.run begin
-			Lwt_unix.openfile port [Unix.O_RDWR; Unix.O_NONBLOCK] 0o640 >>= fun fd ->
+			Lwt_unix.openfile port [Unix.O_RDWR; Unix.O_NONBLOCK] 0o000 >>= fun fd ->
 			Lwt_unix.tcgetattr fd >>= fun attr ->
 			Lwt_unix.tcsetattr fd Unix.TCSANOW
 				{ attr with
