@@ -10,6 +10,7 @@ Create a Serial_config module
 ```ocaml
 module Serial_config = struct
     let port = "/dev/ttyUSB0"
+    let baud_rate = 115200
 end
 ```
 
@@ -24,6 +25,10 @@ The function returns are wrapped in `Lwt.t`, so please read up on [Lwt](https://
 read_line : unit -> string Lwt.t
 write_line : string -> unit Lwt.t
 ```
+```ocaml
+set_baud_rate : int -> unit Lwt.t
+```
+Useful should you wish to change the baud rate after opening the connection.
 ```ocaml
 wait_for_line : string -> unit Lwt.t
 ```
