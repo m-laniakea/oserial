@@ -22,9 +22,9 @@ module type T = sig
 
 		(** Channel for writing lines to the device *)
 		val out_channel : Lwt_io.output Lwt_io.channel
-	end
 
-	val set_baud_rate : int -> unit Lwt.t
+		val set_baud_rate : int -> unit Lwt.t
+	end
 
 	val read_line : unit -> string Lwt.t
 	val write_line : string -> unit Lwt.t

@@ -13,22 +13,22 @@ module Make (T : Serial_intf.Config_T) = struct
 
 		let in_channel = Lwt_io.of_fd fd ~mode:Lwt_io.input
 		let out_channel = Lwt_io.of_fd fd ~mode:Lwt_io.output
-	end
 
-	let set_baud_rate baud_rate =
-		(* First get the current attributes, then set them
-		 * with baud rate changed *)
-		Lwt_unix.tcgetattr Private.fd >>= fun attr ->
-		Lwt_unix.tcsetattr Private.fd Unix.TCSANOW
-			{ attr with c_ibaud = baud_rate
-			; c_obaud = baud_rate
-			; c_echo = false
-			; c_icanon = false
-			}
+		let set_baud_rate baud_rate =
+			(* First get the current attributes, then set them
+			 * with baud rate changed *)
+			Lwt_unix.tcgetattr fd >>= fun attr ->
+			Lwt_unix.tcsetattr fd Unix.TCSANOW
+				{ attr with c_ibaud = baud_rate
+				; c_obaud = baud_rate
+				; c_echo = false
+				; c_icanon = false
+				}
+	end
 
 	(* Initialize with desired baud rate *)
 	let () = Lwt_main.run begin
-		set_baud_rate baud_rate
+		Private.set_baud_rate baud_rate
 	end
 
 	let read_line () =
