@@ -1,7 +1,6 @@
-open Serial_intf
 open Lwt.Infix
 
-module Make (T : Serial_config_type) = struct
+module Make (T : Serial_intf.Config_T) = struct
 	let port = T.port
 	let baud_rate = T.baud_rate
 

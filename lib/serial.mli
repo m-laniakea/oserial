@@ -1,5 +1,3 @@
-open Serial_intf
-
 (** Given a Serial_config struct,
 creates a new module with a newly opened Serial connection.
 Most programs using the {!Serial} module start with something like:
@@ -12,4 +10,4 @@ end
 module Serial0 = Serial.Make(Serial_config)
 ]}
 *)
-module Make (T : Serial_config_type) : Serial_type
+module Make (T : Serial_intf.Config_T) : Serial_intf.T

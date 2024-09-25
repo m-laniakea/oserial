@@ -1,5 +1,5 @@
 (** Configuration for opening a Serial connection *)
-module type Serial_config_type = sig
+module type Config_T = sig
 	(** Location of serial port to be opened *)
 	val port : string
 
@@ -8,7 +8,7 @@ module type Serial_config_type = sig
 end
 
 (** Main module *)
-module type Serial_type = sig
+module type T = sig
 	(** Location of opened serial port *)
 	val port : string
 
