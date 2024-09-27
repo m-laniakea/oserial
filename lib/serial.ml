@@ -74,10 +74,10 @@ let rec io_loop state until =
 	 * If keyword is entered, returns [`Terminate] instead of [`Continue] *)
 	let write_from_stdin () =
 		Lwt_io.(read_line stdin) >>= function
-			| line when Some line = until -> Lwt.return `Terminate
-			| line ->
-				line_write state line >|= fun () ->
-				`Continue
+		| line when Some line = until -> Lwt.return `Terminate
+		| line ->
+			line_write state line >|= fun () ->
+			`Continue
 	in
 
 	(* Take result of first function to complete, and cancel the others *)
