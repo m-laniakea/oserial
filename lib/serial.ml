@@ -13,6 +13,9 @@ type t =
 	(** Location of opened serial port *)
 	}
 
+let baud_rate connection = connection.baud_rate
+let port connection = connection.port
+
 let setup_fd baud_rate fd =
 	(* First get the current attributes, then set them
 	 * with baud rate changed *)
