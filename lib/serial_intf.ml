@@ -24,7 +24,7 @@ module type T = sig
 
 	(** Wait for the specified string to be received.
 	{b Warning:} currently waits indefinitely. *)
-	val wait_for_line : string -> unit Lwt.t
+	val wait_for_line : string -> timeout_s:(float option) -> unit Lwt.t
 
 	(** Open two-way communication between std(i/o) and the Serial device.
 

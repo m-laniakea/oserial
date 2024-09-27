@@ -10,7 +10,7 @@ module Serial0 = Serial.Make(Serial_config)
 let () =
 	let send_command c =
 		Serial0.write_line c >>= fun () ->
-		Serial0.wait_for_line "ok" >>= fun () ->
+		Serial0.wait_for_line "ok" ~timeout_s:(Some 5.) >>= fun () ->
 		Lwt_io.printlf "ok received for %S" c
 	in
 

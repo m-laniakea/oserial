@@ -13,6 +13,10 @@ type t =
 	(** Location of opened serial port *)
 	}
 
+type t_wait_for =
+	| Received
+	| TimedOut
+
 let baud_rate connection = connection.baud_rate
 let port connection = connection.port
 
@@ -85,11 +89,21 @@ let rec io_loop state until =
 	| `Continue -> io_loop state until
 	| `Terminate -> Lwt.return ()
 
-let rec wait_for_line state to_wait_for =
+let wait_for_line state to_wait_for ~timeout_s =
 	(* Read from the device until [Some line] is equal to [to_wait_for] *)
-	line_read state >>= function
-	| line when line = to_wait_for -> Lwt.return ()
-	| _ -> wait_for_line state to_wait_for
+	let rec loop () =
+		line_read state >>= function
+		| line when line = to_wait_for -> Lwt.return Received
+		| _ -> loop ()
+	in
+	let timeout s =
+		Lwt_unix.sleep s >|= fun () ->
+		TimedOut
+	in
+
+	match timeout_s with
+	| None -> loop ()
+	| Some s -> Lwt.pick [ loop (); timeout s ]
 
 module Make (T : Serial_intf.Config_T) = struct
 	let port = T.port
@@ -117,7 +131,9 @@ module Make (T : Serial_intf.Config_T) = struct
 
 	let write_line = line_write Private.state
 
-	let wait_for_line = wait_for_line Private.state
+	let wait_for_line to_wait_for ~timeout_s =
+		wait_for_line Private.state to_wait_for ~timeout_s >>= fun _ ->
+		Lwt.return ()
 
 	(* {{{ IO Loop *)
 	let io_loop = io_loop Private.state

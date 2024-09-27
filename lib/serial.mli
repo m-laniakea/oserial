@@ -14,6 +14,10 @@ module Make (T : Serial_intf.Config_T) : Serial_intf.T
 
 type t
 
+type t_wait_for =
+	| Received
+	| TimedOut
+
 val baud_rate : t -> int
 val connect : port:string -> baud_rate:int -> (t, exn) Lwt_result.t
 val connect_exn : port:string -> baud_rate:int -> t Lwt.t
@@ -21,4 +25,4 @@ val io_loop : t -> string option -> unit Lwt.t
 val line_read : t -> string Lwt.t
 val line_write : t -> string -> unit Lwt.t
 val port : t -> string
-val wait_for_line : t -> string -> unit Lwt.t
+val wait_for_line : t -> string -> timeout_s:(float option) -> t_wait_for Lwt.t
