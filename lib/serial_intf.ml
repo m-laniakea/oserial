@@ -12,18 +12,11 @@ module type T = sig
 	(** Location of opened serial port *)
 	val port : string
 
+	(** Connection Baud rate *)
+	val baud_rate : int
+
 	(** Submodule for values that should not be used externally *)
 	module Private : sig
-		(** File descriptor for the opened serial port *)
-		val fd : Lwt_unix.file_descr
-
-		(** Channel for reading lines from the device *)
-		val in_channel : Lwt_io.input Lwt_io.channel
-
-		(** Channel for writing lines to the device *)
-		val out_channel : Lwt_io.output Lwt_io.channel
-
-		val set_baud_rate : int -> unit Lwt.t
 	end
 
 	val read_line : unit -> string Lwt.t
