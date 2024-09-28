@@ -1,4 +1,5 @@
-(** Given a Serial_config struct,
+(** {b Deprecated. Use record-based interface.}
+Given a Serial_config struct,
 creates a new module with a newly opened Serial connection.
 Most programs using the {!Serial} module start with something like:
 {[
@@ -19,10 +20,52 @@ type t_wait_for =
 	| TimedOut
 
 val baud_rate : t -> int
+
+(**
+	Create a connection. Returns a [connection Lwt_result.t].
+	{[
+		Serial.connect ~port ~baud_rate >>= function
+		| Ok connection ->
+			Lwt_io.printl "Awaiting input. Enter 'quit' when done..." >>= fun () ->
+			Serial.io_loop connection (Some "quit")
+		| Error _ -> Lwt.return () (* TODO: handle exception *)
+	]}
+*)
 val connect : port:string -> baud_rate:int -> (t, exn) Lwt_result.t
+
+(**
+	Create a connection. May raise an exception (e.g. port not found).
+	{[
+		Serial.connect_exn ~port ~baud_rate >>= fun connection ->
+		Lwt_io.printl "Awaiting input. Enter 'quit' when done..." >>= fun () ->
+		Serial.io_loop connection (Some "quit")
+	]}
+*)
 val connect_exn : port:string -> baud_rate:int -> t Lwt.t
+
+(**
+	Enters a loop reading from serial -> stdout, stdin -> serial.
+	Optionally exit loop when [$TERMINATOR] is entered.
+	{[ io_loop connection (Some "done!")
+	]}
+*)
 val io_loop : t -> string option -> unit Lwt.t
 val line_read : t -> string Lwt.t
 val line_write : t -> string -> unit Lwt.t
 val port : t -> string
+
+(**
+	Waits for a keyword with optional timeout.
+	{[
+		wait_for_line connection "wait for me!" ~timeout_s:(Some 8.)
+		wait_for_line connection "wait for me!" ~timeout_s:None
+	]}
+
+	Returns either [Received] or [TimedOut].
+	{[
+		wait_for_line connection "ok" ~timeout_s:(Some  5.) >>= function
+		| Received -> Lwt_io.printlf "ok received for %S" c
+		| TimedOut -> Lwt_io.printlf "didn't hear back in time for %S" c
+	]}
+*)
 val wait_for_line : t -> string -> timeout_s:(float option) -> t_wait_for Lwt.t
