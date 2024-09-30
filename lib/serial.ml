@@ -4,10 +4,6 @@ module C = Connection
 
 module type T = Serial_intf.T
 
-type t_wait_for =
-	| Received
-	| TimedOut
-
 let baud_rate (connection : C.t) = connection.baud_rate
 let port (connection : C.t) = connection.port
 
@@ -86,12 +82,12 @@ let wait_for_line state to_wait_for ~timeout_s =
 	(* Read from the device until [Some line] is equal to [to_wait_for] *)
 	let rec loop () =
 		line_read state >>= function
-		| line when line = to_wait_for -> Lwt.return Received
+		| line when line = to_wait_for -> Lwt.return Wait_for.Received
 		| _ -> loop ()
 	in
 	let timeout s =
 		Lwt_unix.sleep s >|= fun () ->
-		TimedOut
+		Wait_for.TimedOut
 	in
 
 	match timeout_s with
@@ -111,8 +107,7 @@ module Make (T : Serial_intf.Config_T) = struct
 	let write_line = line_write Private.state
 
 	let wait_for_line to_wait_for ~timeout_s =
-		wait_for_line Private.state to_wait_for ~timeout_s >>= fun _ ->
-		Lwt.return ()
+		wait_for_line Private.state to_wait_for ~timeout_s
 
 	(* {{{ IO Loop *)
 	let io_loop = io_loop Private.state

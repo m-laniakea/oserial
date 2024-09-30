@@ -16,10 +16,6 @@ module type T = Serial_intf.T
 
 val make : Connection.t -> (module T)
 
-type t_wait_for =
-	| Received
-	| TimedOut
-
 val baud_rate : Connection.t -> int
 
 (**
@@ -69,4 +65,4 @@ val port : Connection.t -> string
 		| TimedOut -> Lwt_io.printlf "didn't hear back in time for %S" c
 	]}
 *)
-val wait_for_line : Connection.t -> string -> timeout_s:(float option) -> t_wait_for Lwt.t
+val wait_for_line : Connection.t -> string -> timeout_s:(float option) -> Wait_for.t Lwt.t

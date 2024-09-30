@@ -20,7 +20,7 @@ module type T = sig
 	val write_line : string -> unit Lwt.t
 
 	(** Wait for the specified string to be received. *)
-	val wait_for_line : string -> timeout_s:(float option) -> unit Lwt.t
+	val wait_for_line : string -> timeout_s:(float option) -> Wait_for.t Lwt.t
 
 	(** Open two-way communication between std(i/o) and the Serial device.
 

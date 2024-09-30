@@ -6,8 +6,8 @@ let baud_rate = 115200
 let send_command connection c =
 	Serial.line_write connection c >>= fun () ->
 	Serial.wait_for_line connection "ok" ~timeout_s:(Some  5.) >>= function
-	| Serial.Received -> Lwt_io.printlf "ok received for %S" c
-	| Serial.TimedOut -> Lwt_io.printlf "didn't hear back in time for %S" c
+	| Received -> Lwt_io.printlf "ok received for %S" c
+	| TimedOut -> Lwt_io.printlf "didn't hear back in time for %S" c
 
 let demo connection =
 	let commands =

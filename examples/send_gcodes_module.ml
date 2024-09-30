@@ -16,8 +16,9 @@ let demo =
 
 	let send_command c =
 		Serial0.write_line c >>= fun () ->
-		Serial0.wait_for_line "ok" ~timeout_s:(Some 5.) >>= fun () ->
-		Lwt_io.printlf "ok received for %S" c
+		Serial0.wait_for_line "ok" ~timeout_s:(Some 5.) >>= function
+		| Received -> Lwt_io.printlf "ok received for %S" c
+		| TimedOut -> Lwt_io.printlf "didn't hear back in time for %S" c
 	in
 
 	Lwt_io.printl "Starting demo...." >>= fun () ->
