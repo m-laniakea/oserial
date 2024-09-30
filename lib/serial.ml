@@ -26,9 +26,10 @@ let setup_fd baud_rate fd =
 	Lwt_unix.tcgetattr fd >>= fun attr ->
 	Lwt_unix.tcsetattr fd Unix.TCSANOW
 		{ attr with c_ibaud = baud_rate
-		; c_obaud = baud_rate
 		; c_echo = false
 		; c_icanon = false
+		; c_obaud = baud_rate
+		; c_opost = false
 		}
 
 let setup ~port ~baud_rate =
