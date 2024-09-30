@@ -47,8 +47,9 @@ val connect_exn : port:string -> baud_rate:int -> Connection.t Lwt.t
 	]}
 *)
 val io_loop : Connection.t -> string option -> unit Lwt.t
-val line_read : Connection.t -> string Lwt.t
-val line_write : Connection.t -> string -> unit Lwt.t
+val read_line : Connection.t -> string Lwt.t
+val write_line : Connection.t -> string -> unit Lwt.t
+val write : Connection.t -> string -> unit Lwt.t
 val port : Connection.t -> string
 
 (**

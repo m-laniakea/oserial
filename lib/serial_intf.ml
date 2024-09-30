@@ -18,6 +18,7 @@ module type T = sig
 
 	val read_line : unit -> string Lwt.t
 	val write_line : string -> unit Lwt.t
+	val write : string -> unit Lwt.t
 
 	(** Wait for the specified string to be received. *)
 	val wait_for_line : string -> timeout_s:(float option) -> Wait_for.t Lwt.t

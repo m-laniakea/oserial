@@ -50,15 +50,16 @@ let connect ~port ~baud_rate =
 		( fun () -> connect_exn ~port ~baud_rate >>= Lwt_result.return )
 		( fun e -> Lwt_result.fail e )
 
-let line_read (connection : C.t) = Lwt_io.read_line connection.channel_in
-let line_write (connection : C.t) = Lwt_io.fprintl connection.channel_out
+let read_line (connection : C.t) = Lwt_io.read_line connection.channel_in
+let write_line (connection : C.t) = Lwt_io.write_line connection.channel_out
+let write (connection : C.t) = Lwt_io.write connection.channel_out
 
 let rec io_loop state until =
 
 	(* Reads a line from device and outputs to stdout
 	 * Keyword is not accepted when received from device; always returns [`Continue] *)
 	let read_to_stdin () =
-		line_read state >>= fun line ->
+		read_line state >>= fun line ->
 		Lwt_io.printl line >|= fun () ->
 		`Continue
 	in
@@ -69,7 +70,7 @@ let rec io_loop state until =
 		Lwt_io.(read_line stdin) >>= function
 		| line when Some line = until -> Lwt.return `Terminate
 		| line ->
-			line_write state line >|= fun () ->
+			write_line state line >|= fun () ->
 			`Continue
 	in
 
@@ -81,7 +82,7 @@ let rec io_loop state until =
 let wait_for_line state to_wait_for ~timeout_s =
 	(* Read from the device until [Some line] is equal to [to_wait_for] *)
 	let rec loop () =
-		line_read state >>= function
+		read_line state >>= function
 		| line when line = to_wait_for -> Lwt.return Wait_for.Received
 		| _ -> loop ()
 	in
@@ -102,9 +103,10 @@ module Make (T : Serial_intf.Config_T) = struct
 		let state = T.connection
 	end
 
-	let read_line () = line_read Private.state
+	let read_line () = read_line Private.state
 
-	let write_line = line_write Private.state
+	let write_line = write_line Private.state
+	let write = write Private.state
 
 	let wait_for_line to_wait_for ~timeout_s =
 		wait_for_line Private.state to_wait_for ~timeout_s

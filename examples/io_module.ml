@@ -6,7 +6,8 @@ let port = "/dev/pts/19"
 let baud_rate = 115200
 
 let use_module_somewhere_else (module M : Serial.T) =
-	M.write_line "hello from the other side."
+	M.write "hello " >>= fun () ->
+	M.write_line "from the other side."
 
 let modulify connection =
 	let module S0 = (val Serial.make connection) in
