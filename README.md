@@ -32,7 +32,8 @@ socat -d -d pty,raw,echo=0 pty,raw,echo=0
 # "... N PTY is /dev/pts/14"
 # "... N PTY is /dev/pts/19"
 
-# open one using Serial, the other using socat:
+# open one using Serial, the other using socat
+(or two connections via this library!):
 
 socat - /dev/pts/14,raw,echo=0
 ```
@@ -41,8 +42,9 @@ socat - /dev/pts/14,raw,echo=0
 
 The function returns are wrapped in `Lwt.t`, so please read up on [Lwt](https://ocsigen.org/lwt/5.2.0/manual/manual) should you be unfamiliar with the library.
 ```ocaml
-line_read : connection -> unit -> string Lwt.t
-line_write : connection -> string -> unit Lwt.t
+read_line : connection -> unit -> string Lwt.t
+write_line : connection -> string -> unit Lwt.t
+write : connection -> string -> unit Lwt.t
 
 baud_rate : connection -> int
 port : connection -> string
@@ -65,39 +67,22 @@ Opens a two-way communication channel between stdin and the serial device. \
 Usage: `io_loop connection (Some "quit")`. \
 If `None` is supplied instead, does not exit for any keyword.
 
-## [Deprecated] Usage
-Create a Serial_config module
+## Usage (module-based)
+Once you have a `connection` record, you can create module:
 ```ocaml
-module Serial_config = struct
-    let port = "/dev/ttyUSB0"
-    let baud_rate = 115200
-end
-```
-
-Open the port
-```ocaml
-module Serial0 = Serial.Make(Serial_config)
+let module DaytimeSerial = (val Serial.make connection) 
 ```
 
 Use the created module
 ```ocaml
-Serial0.io_loop (Some "i quit")
+DaytimeSerial.write_line "Regresaré como lo que soy: como una reina." >>= fun () ->
+DaytimeSerial.io_loop (Some "Siniestra belleza")
 ```
 
-**Supplied Functions**
-The function returns are wrapped in `Lwt.t`, so please read up on [Lwt](https://ocsigen.org/lwt/5.2.0/manual/manual) should you be unfamiliar with the library.
+### Modules or Records?
+It's up to you. The functions are 1:1 equivalent.
+Side by side:
 ```ocaml
-read_line : unit -> string Lwt.t
-write_line : string -> unit Lwt.t
+MySerial.write "Enamórate de ti. De la vida. Y luego de quien tú quieras."
+Serial.write connection "Enamórate de ti. De la vida. Y luego de quien tú quieras."
 ```
-```ocaml
-wait_for_line : string -> timeout_s:float option -> unit Lwt.t
-```
-Usage: `wait_for_line "READY"`.
-If `timeout_s` is `None`, waits forever.
-```ocaml
-io_loop : string option -> unit Lwt.t
-```
-Opens a two-way communication channel between stdin and the serial device.
-Usage: `io_loop (Some "quit")`. \
-If `None` is supplied instead, does not exit for any keyword.
