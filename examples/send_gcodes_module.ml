@@ -1,8 +1,7 @@
 open Lwt.Infix
 
-let port = "/dev/pts/19"
+let port = "/dev/ttyUSB0"
 let baud_rate = 115200
-
 
 let demo =
 	let commands =
