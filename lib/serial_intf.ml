@@ -1,10 +1,6 @@
 (** Configuration for opening a Serial connection *)
 module type Config_T = sig
-	(** Location of serial port to be opened *)
-	val port : string
-
-	(** Connection Baud rate *)
-	val baud_rate : int
+	val connection : Connection.t
 end
 
 (** Main module *)
@@ -17,6 +13,7 @@ module type T = sig
 
 	(** Submodule for values that should not be used externally *)
 	module Private : sig
+		val state : Connection.t
 	end
 
 	val read_line : unit -> string Lwt.t

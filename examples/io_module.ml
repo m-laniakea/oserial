@@ -1,11 +1,23 @@
-module Serial_config = struct
-	let port = "/dev/pts/19"
-	let baud_rate = 115200
-end
+open Lwt.Infix
 
-module Serial0 = Serial.Make(Serial_config)
+module S = Shared
 
-let () =
-	Lwt_main.run begin
-		Serial0.io_loop (Some "quit")
-	end
+let port = "/dev/pts/19"
+let baud_rate = 115200
+
+let use_module_somewhere_else (module M : Serial.T) =
+	M.write_line "hello from the other side."
+
+let modulify connection =
+	let module S0 = (val Serial.make connection) in
+
+	Lwt_io.printl "Writing to serial until 'quit' is entered..." >>= fun () ->
+	S0.io_loop (Some "quit") >>= fun () ->
+	use_module_somewhere_else (module S0)
+
+let main =
+	Serial.connect ~port ~baud_rate >>= function
+	| Ok connection -> modulify connection
+	| Error e -> S.print_exn_conn e
+
+let () = Lwt_main.run main

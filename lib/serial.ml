@@ -1,24 +1,15 @@
 open Lwt.Infix
 
-type t =
-	{ baud_rate : int
-	(** Baud rate of connection. Usually one of [9600; 115200] *)
-	; channel_in : Lwt_io.input Lwt_io.channel
-	(** Channel for reading lines from the device *)
-	; channel_out : Lwt_io.output Lwt_io.channel
-	(** Channel for writing lines to the device *)
-	; fd : Lwt_unix.file_descr
-	(** File descriptor for the opened serial port *)
-	; port : string
-	(** Location of opened serial port *)
-	}
+module C = Connection
+
+module type T = Serial_intf.T
 
 type t_wait_for =
 	| Received
 	| TimedOut
 
-let baud_rate connection = connection.baud_rate
-let port connection = connection.port
+let baud_rate (connection : C.t) = connection.baud_rate
+let port (connection : C.t) = connection.port
 
 let setup_fd baud_rate fd =
 	(* First get the current attributes, then set them
@@ -50,6 +41,7 @@ let connect_exn ~port ~baud_rate =
 	let channel_in = Lwt_io.of_fd fd ~mode:Lwt_io.input in
 	let channel_out = Lwt_io.of_fd fd ~mode:Lwt_io.output in
 
+	C.
 	{ baud_rate
 	; channel_in
 	; channel_out
@@ -62,8 +54,8 @@ let connect ~port ~baud_rate =
 		( fun () -> connect_exn ~port ~baud_rate >>= Lwt_result.return )
 		( fun e -> Lwt_result.fail e )
 
-let line_read state = Lwt_io.read_line state.channel_in
-let line_write state = Lwt_io.fprintl state.channel_out
+let line_read (connection : C.t) = Lwt_io.read_line connection.channel_in
+let line_write (connection : C.t) = Lwt_io.fprintl connection.channel_out
 
 let rec io_loop state until =
 
@@ -107,25 +99,11 @@ let wait_for_line state to_wait_for ~timeout_s =
 	| Some s -> Lwt.pick [ loop (); timeout s ]
 
 module Make (T : Serial_intf.Config_T) = struct
-	let port = T.port
-	let baud_rate = T.baud_rate
+	let port = T.connection.port
+	let baud_rate = T.connection.baud_rate
 
 	module Private = struct
-
-		let fd = Lwt_main.run begin
-			setup ~port:T.port ~baud_rate:T.baud_rate
-		end
-
-		let in_channel = Lwt_io.of_fd fd ~mode:Lwt_io.input
-		let out_channel = Lwt_io.of_fd fd ~mode:Lwt_io.output
-
-		let state =
-			{ baud_rate
-			; channel_in = in_channel
-			; channel_out = out_channel
-			; fd
-			; port
-			}
+		let state = T.connection
 	end
 
 	let read_line () = line_read Private.state
@@ -140,3 +118,7 @@ module Make (T : Serial_intf.Config_T) = struct
 	let io_loop = io_loop Private.state
 
 end
+
+let make connection =
+	let module Config = struct let connection = connection end in
+	(module Make(Config) : T)

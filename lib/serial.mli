@@ -12,14 +12,15 @@ module Serial0 = Serial.Make(Serial_config)
 ]}
 *)
 module Make (T : Serial_intf.Config_T) : Serial_intf.T
+module type T = Serial_intf.T
 
-type t
+val make : Connection.t -> (module T)
 
 type t_wait_for =
 	| Received
 	| TimedOut
 
-val baud_rate : t -> int
+val baud_rate : Connection.t -> int
 
 (**
 	Create a connection. Returns a [connection Lwt_result.t].
@@ -31,7 +32,7 @@ val baud_rate : t -> int
 		| Error _ -> Lwt.return () (* TODO: handle exception *)
 	]}
 *)
-val connect : port:string -> baud_rate:int -> (t, exn) Lwt_result.t
+val connect : port:string -> baud_rate:int -> (Connection.t, exn) Lwt_result.t
 
 (**
 	Create a connection. May raise an exception (e.g. port not found).
@@ -41,7 +42,7 @@ val connect : port:string -> baud_rate:int -> (t, exn) Lwt_result.t
 		Serial.io_loop connection (Some "quit")
 	]}
 *)
-val connect_exn : port:string -> baud_rate:int -> t Lwt.t
+val connect_exn : port:string -> baud_rate:int -> Connection.t Lwt.t
 
 (**
 	Enters a loop reading from serial -> stdout, stdin -> serial.
@@ -49,10 +50,10 @@ val connect_exn : port:string -> baud_rate:int -> t Lwt.t
 	{[ io_loop connection (Some "done!")
 	]}
 *)
-val io_loop : t -> string option -> unit Lwt.t
-val line_read : t -> string Lwt.t
-val line_write : t -> string -> unit Lwt.t
-val port : t -> string
+val io_loop : Connection.t -> string option -> unit Lwt.t
+val line_read : Connection.t -> string Lwt.t
+val line_write : Connection.t -> string -> unit Lwt.t
+val port : Connection.t -> string
 
 (**
 	Waits for a keyword with optional timeout.
@@ -68,4 +69,4 @@ val port : t -> string
 		| TimedOut -> Lwt_io.printlf "didn't hear back in time for %S" c
 	]}
 *)
-val wait_for_line : t -> string -> timeout_s:(float option) -> t_wait_for Lwt.t
+val wait_for_line : Connection.t -> string -> timeout_s:(float option) -> t_wait_for Lwt.t
