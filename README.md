@@ -67,6 +67,11 @@ Opens a two-way communication channel between stdin and the serial device. \
 Usage: `io_loop connection (Some "quit")`. \
 If `None` is supplied instead, does not exit for any keyword.
 
+```ocaml
+val make : Connection.t -> (module T)
+```
+See below.
+
 ## Usage (module-based)
 Once you have a `connection` record, you can create module:
 ```ocaml
