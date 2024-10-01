@@ -108,8 +108,7 @@ module Make (T : Serial_intf.Config_T) = struct
 	let write_line = write_line Private.state
 	let write = write Private.state
 
-	let wait_for_line to_wait_for ~timeout_s =
-		wait_for_line Private.state to_wait_for ~timeout_s
+	let wait_for_line = wait_for_line Private.state
 
 	(* {{{ IO Loop *)
 	let io_loop = io_loop Private.state
