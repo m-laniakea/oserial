@@ -2,4 +2,5 @@
 	(name serial)
 	(public_name serial)
 	(libraries lwt lwt.unix)
+	(modules_without_implementation connection wait_for)
 )

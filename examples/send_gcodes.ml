@@ -1,30 +1,28 @@
 open Lwt.Infix
 
-module Serial_config = struct
-	let port = "/dev/ttyUSB0"
-	let baud_rate = 115200
-end
+let port = "/dev/ttyUSB0"
+let baud_rate = 115200
 
-module Serial0 = Serial.Make(Serial_config)
+let send_command connection c =
+	Serial.write_line connection c >>= fun () ->
+	Serial.wait_for_line connection "ok" ~timeout_s:(Some  5.) >>= function
+	| Received -> Lwt_io.printlf "ok received for %S" c
+	| TimedOut -> Lwt_io.printlf "didn't hear back in time for %S" c
+
+let demo connection =
+	let commands =
+		[ "G28"; "G0 Z60"; "M81"; "G4 S1"
+		; "G0 Z50"; "G4 P200"; "G0 Z40"
+		]
+	in
+
+	Lwt_io.printl "Starting demo...." >>= fun () ->
+	Lwt_list.iter_s (send_command connection) commands >>= fun () ->
+	Lwt_io.printl "Commands sent."
 
 let () =
-	let send_command c =
-		Serial0.write_line c >>= fun () ->
-		Serial0.wait_for_line "ok" >>= fun () ->
-		Lwt_io.printlf "ok received for %S" c
-	in
-
-	let demo =
-		let commands =
-			[ "G28"; "G0 Z60"; "M81"; "G4 S1"
-			; "G0 Z50"; "G4 P200"; "G0 Z40"
-			]
-		in
-
-		Lwt_io.printl "Starting demo...." >>= fun () ->
-		Lwt_list.iter_s send_command commands >>= fun () ->
-		Lwt_io.printl "Commands sent."
-	in
-
-	Lwt_main.run
-		demo
+	Lwt_main.run begin
+		Serial.connect ~port ~baud_rate >>= function
+		| Ok connection -> demo connection
+		| Error e -> Shared.print_exn_conn e
+	end
