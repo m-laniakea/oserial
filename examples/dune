@@ -1,4 +1,4 @@
 (executables
-  (names send_gcodes io)
+  (names send_gcodes send_gcodes_module io io_exn io_module)
   (libraries unix lwt lwt.unix serial)
 )

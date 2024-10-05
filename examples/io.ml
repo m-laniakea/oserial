@@ -1,11 +1,15 @@
-module Serial_config = struct
-	let port = "/dev/ttyUSB0"
-	let baud_rate = 115200
-end
+open Lwt.Infix
 
-module Serial0 = Serial.Make(Serial_config)
+module S = Shared
+
+let port = "/dev/pts/19"
+let baud_rate = 115200
 
 let () =
 	Lwt_main.run begin
-		Serial0.io_loop (Some "quit")
+		Serial.connect ~port ~baud_rate >>= function
+		| Ok connection ->
+			Lwt_io.printl "Awaiting input. Enter 'quit' when done..." >>= fun () ->
+			Serial.io_loop connection (Some "quit")
+		| Error e -> S.print_exn_conn e
 	end
