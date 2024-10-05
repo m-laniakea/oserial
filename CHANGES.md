@@ -2,4 +2,4 @@
 - Added new interface
 - Modified module-based interface 
 - added `write : string -> unit Lwt.t`
-
+- add timeout to `wait_for_line`
